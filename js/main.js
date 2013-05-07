@@ -1,0 +1,371 @@
+/*
+VFW Project 4
+David Clark
+03/02/13
+*/
+
+window.addEventListener("DOMContentLoaded", function(){
+
+	function $(x){
+		var theInput = document.getElementById(x);
+		return theInput;
+	}
+	
+	function createWeapons (){
+		var formTag = document.getElementsByTagName("form"),
+			selectLi = $('select'),
+			createSelect = document.createElement('select');
+			createSelect.setAttribute("id", "weaponChoices");
+		for (var i=0, j=weaponChoices.length; i<j; i++){
+			var makeOption = document.createElement("option");
+			var optText = weaponChoices[i];
+			makeOption.setAttribute("value", optText);
+			makeOption.innerHTML = optText;
+			createSelect.appendChild(makeOption);
+		}
+		selectLi.appendChild(createSelect);
+	}
+		
+	function createCats (){
+		var formTag = document.getElementsByTagName("form"),
+			selectLi = $('cats'),
+			createSelect = document.createElement('select');
+			createSelect.setAttribute("id", "catSelection");
+		for (var i=0, j=catSelection.length; i<j; i++){
+			var makeOption = document.createElement("option");
+			var optText = catSelection[i];
+			makeOption.setAttribute("value", optText);
+			makeOption.innerHTML = optText;
+			createSelect.appendChild(makeOption);
+		}
+		selectLi.appendChild(createSelect);
+	}
+	
+		function getGrenadeValue (){
+		if($('grenade').checked){
+			grenadeValue = $('grenade').value;
+		}else{
+			grenadeValue = "No";
+		}
+	}
+	
+		function getFoodValue (){
+		if($('food').checked){
+			foodValue = $('food').value;
+		}else{
+			foodValue = "No";
+		}
+	}
+	
+		function getDrinkValue (){
+		if($('drink').checked){
+			drinkValue = $('drink').value;
+		}else{
+			drinkValue = "No";
+		}
+	}
+	
+		function getMedicineValue (){
+		if($('medicine').checked){
+			medicineValue = $('medicine').value;
+		}else{
+			medicineValue = "No";
+		}
+	}
+	
+	function storeLoadout (key){
+		if(!key){
+			var id					= Math.floor(Math.random()*100001);
+		}else{
+			var id 					= key;
+		}
+		getGrenadeValue();
+		getFoodValue();
+		getDrinkValue();
+		getMedicineValue();
+		var loadout					= {};
+			loadout.loadoutCat		= ["Loadout Category:", $('catSelection').value];
+			loadout.name			= ["Loadout Creator:", $('name').value];
+			loadout.gearName		= ["Loadout Name:", $('gearName').value];
+			loadout.dateAdded		= ["Creation Date:", $('dateAdded').value];
+			loadout.weaponChoices	= ["Weapon Choice:", $('weaponChoices').value];
+			loadout.magAmount		= ["Magazine Quantity:", $('magAmount').value];			
+			loadout.grenade			= ["Grenade?", grenadeValue];
+			loadout.food			= ["Food?", foodValue];
+			loadout.drink			= ["Drink?", drinkValue];
+			loadout.medicine		= ["Medicine?", medicineValue];
+			loadout.comments		= ["Comments:", $('comments').value];
+		localStorage.setItem(id, JSON.stringify(loadout));
+		alert("Loadout has been saved.");
+	}
+	
+	function toggleNavControls (n){
+		switch(n){
+			case "on":
+				$('addGear').style.display = "none";
+				$('clear').style.display = "inline";
+				$('displayLink').style.display = "none";
+				$('addNewLoadout').style.display= "inline";
+				$('addNewLoadout').style.cssFloat = "right";
+				break;
+			case "off":
+				$('addGear').style.display = "block";
+				$('clear').style.display = "inline";
+				$('displayLink').style.display = "inline";
+				$('addNewLoadout').style.display= "none";
+				$('items').style.display = "display";
+				break;
+			default:
+				return false;
+		}
+	}
+	
+	function getLoadouts (){
+		toggleNavControls("on");
+		if(localStorage.length === 0){
+			alert("There are no loadouts saved, so adding in test loadouts.");
+			addTestLoadouts();
+		}
+		var makeDiv = document.createElement('div');
+		makeDiv.setAttribute("id", "items");
+		var makeList = document.createElement('ul');
+		makeDiv.appendChild(makeList);
+		document.body.appendChild(makeDiv);
+		$('items').style.display = "block";
+		for(var i=0, j=localStorage.length; i<j;i++){
+			var makeLi = document.createElement('li');
+			var makeLinkLi = document.createElement('li');
+			makeList.appendChild(makeLi);
+			var key = localStorage.key(i);
+			var value = localStorage.getItem(key);
+			var obj = JSON.parse(value);
+			var makeSubList = document.createElement('ul');
+			makeLi.appendChild(makeSubList);
+			getImage(obj.weaponChoices[1], makeSubList);
+			for(var n in obj){
+				var makeSubLi = document.createElement('li');
+				makeSubList.appendChild(makeSubLi);
+				var optSubText = obj[n][0]+" "+obj[n][1];
+				makeSubLi.innerHTML = optSubText;
+				makeSubList.appendChild(makeLinkLi);
+			}
+			makeItemLinks(localStorage.key(i), makeLinkLi);
+		}
+	}
+	
+	function getImage (catName, makeSubList){
+		var imageLi = document.createElement('li');
+		makeSubList.appendChild(imageLi);
+		var newImage = document.createElement('img');
+		var setSource = newImage.setAttribute("src", "images/"+ catName + ".png");
+		imageLi.appendChild(newImage);
+	}
+	
+	function addTestLoadouts (){
+		for(var n in json){
+			var id = Math.floor(Math.random()*100001);
+			localStorage.setItem(id, JSON.stringify(json[n]));
+		}
+	}
+	
+	function makeItemLinks (key, makeLinkLi){
+		var editLink = document.createElement('a');
+		editLink.href = "#";
+		editLink.key = key;
+		var editText = "Edit loadout";
+		editLink.addEventListener("click", editItem);
+		editLink.innerHTML = editText;
+		makeLinkLi.appendChild(editLink);
+		
+		var breakTag = document.createElement('br');
+		makeLinkLi.appendChild(breakTag);
+		
+		var deleteLink = document.createElement('a');
+		deleteLink.href = "#";
+		deleteLink.key = key;
+		var deleteText = "Delete loadout";
+		deleteLink.addEventListener("click", deleteLoadout);
+		deleteLink.innerHTML = deleteText;
+		makeLinkLi.appendChild(deleteLink);
+	}
+	
+	function editItem (){
+		var value = localStorage.getItem(this.key);
+		var loadout = JSON.parse(value);
+		toggleNavControls("off");
+		$('catSelection').value = loadout.loadoutCat[1];
+		$('name').value = loadout.name[1];
+		$('gearName').value = loadout.gearName[1];
+		$('dateAdded').value = loadout.dateAdded[1];
+		$('weaponChoices').value = loadout.weaponChoices[1];
+		$('magAmount').value = loadout.magAmount[1];
+		if(loadout.grenade[1] == "Grenade"){
+			$('grenade').setAttribute("checked", "checked");
+		}
+		if(loadout.food[1] == "Food"){
+			$('food').setAttribute("checked", "checked");
+		}
+		if(loadout.drink[1] == "Drink"){
+			$('drink').setAttribute("checked", "checked");
+		}
+		if(loadout.medicine[1] == "Medicine"){
+			$('medicine').setAttribute("checked", "checked");
+		}
+		$('comments').value = loadout.comments[1];
+		submit.removeEventListener("click", storeLoadout);
+		$('submit').value = "Edit Loadout";
+		var editSubmit = $('submit');
+		editSubmit.addEventListener("click", validate);
+		editSubmit.key = this.key;
+	}
+	
+	function deleteLoadout (){
+		var ask = confirm("Are you sure you want to delete this loadout?");
+		if (ask){
+			localStorage.removeItem(this.key);
+			alert("Loadout was deleted.");
+			window.location.reload();
+		}else {
+			alert("Loadout wasn't deleted.");
+		}
+	}
+	
+	function clearLoadouts (){
+		if(localStorage.length === 0){
+			alert("There are no saved loadouts to delete.");
+		}else{
+			localStorage.clear();
+			alert("All loadouts have been deleted.");
+			window.location.reload();
+			return false;
+		}
+	}
+	
+	function validate (e){
+		var getCategory 		= $('catSelection');
+		var getName 			= $('name');
+		var getGearName 		= $('gearName');
+		var getDateAdded 		= $('dateAdded');
+		var getWeaponChoices 	= $('weaponChoices');
+		
+		errorMsg.innerHTML = "";
+		getName.style.border = "1px solid black";
+		getGearName.style.border = "1px solid black";
+		getDateAdded.style.border = "1px solid black";
+		getWeaponChoices.style.border = "1px solid black";
+		
+		var errorArray = [];
+		
+		if(getCategory.value === "--Please select a category--"){
+			var categoryError = "Please select a category.";
+			getCategory.style.border = "1px solid red";
+			errorArray.push(categoryError);
+		}
+		
+		if(getName.value === ""){
+			var nameError = "Please add your name.";
+			getName.style.border = "1px solid red";
+			errorArray.push(nameError);
+		}
+		
+		if(getGearName.value === ""){
+			var gearNameError = "Please add a loadout name.";
+			getGearName.style.border = "1px solid red";
+			errorArray.push(gearNameError);
+		}
+		
+		if(getDateAdded.value === ""){
+			var dateAddedError = "Please add a date.";
+			getDateAdded.style.border = "1px solid red";
+			errorArray.push(dateAddedError);
+		}
+		
+		if(getWeaponChoices.value === "--Select a Weapon--"){
+			var weaponChoicesError = "Please select a weapon.";
+			getWeaponChoices.style.border = "1px solid red";
+			errorArray.push(weaponChoicesError);
+		}
+		
+		if(errorArray.length >= 1){
+			for(var i=0, j=errorArray.length; i < j; i++){
+				var txt = document.createElement('li');
+				txt.innerHTML = errorArray[i];
+				errorMsg.appendChild(txt);
+			}
+			e.preventDefault();
+			return false;
+		}else{
+			storeLoadout(this.key);
+		}
+		
+	}
+	
+	var catSelection = [
+		"--Please select a category--",
+		"Assault",
+		"Support",
+		"Sniper",
+		"Engineer",
+		"Recon"
+	];
+	
+	var weaponChoices = [
+		"--Select a Weapon--",
+		"Crossbow",
+		"M1014",
+		"Remington",
+		"Double-barrel",
+		"Winchester",
+		"Bizon",
+		"MP5A5",
+		"MP5SD6",
+		"AK-74",
+		"AKS-74",
+		"AKS-74U",
+		"L85A2",
+		"M4A1",
+		"M4A1_CCO",
+		"M4A1_CCO_SD",
+		"M4A1_Holo",
+		"M4A3_CCO",
+		"M16A2",
+		"M16A2_M203",
+		"M16A4_ACOG",
+		"AKM",
+		"Lee_Enfield",
+		"FN_FAL",
+		"FN_FAL_ANPVS4",
+		"M249_SAW",
+		"M240",
+		"Mk_48_Mod_0",
+		"CZ_550",
+		"DMR",
+		"M14_AIM",
+		"M24",
+		"SVD_Camo",
+		"M107",
+		"AS50",
+	]
+		grenadeValue = "No",
+		foodValue = "No",
+		drinkValue = "No",
+		medicineValue = "No",
+		errorMsg = $('errors');
+	
+	createCats();
+	createWeapons();
+	
+	var clearDataLink = $("clear");
+	clearDataLink.addEventListener("click", clearLoadouts);
+	
+	var displayDataLink = $('displayLink');
+	displayDataLink.addEventListener("click", getLoadouts);
+	
+	var submit = $('submit');
+	submit.addEventListener("click", validate);
+	
+
+
+
+	
+});

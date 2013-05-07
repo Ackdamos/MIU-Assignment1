@@ -1,4 +1,4 @@
 MIU-Assignment1
 ===============
 
-Mobile Interfaces and Usability project 1.
+Mobile Interfaces and Usability assignment 1.
